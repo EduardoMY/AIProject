@@ -3,6 +3,49 @@
 from appJar import gui
 from pyswip import Prolog
 
+
+def aeropuertoExists(clave):
+    print aeropuertosCounter
+    if aeropuertosCounter and list(prolog.query("aeropuerto("+clave+", X)")):
+        return True
+    else:
+        return False
+    
+def vueloExists(clave):
+    print vuelosCounter
+    if vuelosCounter and list(prolog.query("vuelo("+clave+", O, D, C)")):
+        return True
+    else:
+        return False
+    
+def addAeropuerto(clave, name):
+    prolog.assertz("aeropuerto("+clave+", "+name+")")
+    global aeropuertosCounter
+    aeropuertosCounter += 1
+    
+def addVuelo(clave, origen, destino, costo):
+    prolog.assertz("vuelo("+clave+","+origen+","+destino+"," +costo+")")
+    global vuelosCounter
+    vuelosCounter += 1
+
+def deleteAeropuerto(clave):
+    prolog.retract("aeropuerto("+clave+",X)")
+    global aeropuertosCounter
+    aeropuertosCounter -= 1
+
+def deleteVuelo(clave):
+    prolog.retract("vuelo(m, moda)")
+    global vuelosCounter
+    vuelosCounter -= 1
+
+def changeAeropuerto(clave, name):
+    deleteAeropuerto(clave)
+    addAeropuerto(clave, name)
+
+def changeVuelo(clave, origen, destino, costo):
+    deleteVuelo(clave)
+    addVuelo(clave, origen, destino, costo)
+
 def menu(btn):
     if btn=="Cancel":
         app.stop()
@@ -10,16 +53,30 @@ def menu(btn):
         print "Todos los viajes"
         
 def abcAeropuerto(btn):
-    if btn == "Alta":
-        print "sii"
-        app.infoBox("hola", "LOL")
+    clave = app.getEntry("aeropuertoClave")
+    if clave == "":
+      app.warningBox("Error", "No se encontro clave")  
+    elif btn == "Alta":
+        if not aeropuertoExists(clave):
+            addAeropuerto(clave, app.getEntry("aeropuertoName"))
+        else:
+            app.warningBox("Error", "Aeropuerto ya existe")
     elif btn == "Baja":
-        print "Baja"
-    else:
-        print "Cambio"
+        if aeropuertoExists(clave):
+            deleteAeropuerto(clave)
+        else:
+            app.warningBox("Error","Esa clave no esta ligada a ningun Aeropuerto")
+    else: #Cambio
+        if aeropuertoExists(clave):
+            changeAeropuerto(clave, app.getEntry("aeropuertoName"))
+        else:
+            app.warningBox("Error","Esa clave no esta ligada a ningun Aeropuerto")
 
 def abcVuelo(btn):
-    if btn == "_Alta":
+    clave = app.getEntry("aeropuertoClave")
+    if clave== "":
+        app.warningBox("Error", "No se encontro clave")
+    elif btn == "_Alta":
         print "Holis ss"
     elif btn == "_Baja":
         print "_Baja"
@@ -28,20 +85,16 @@ def abcVuelo(btn):
 
 def show(btn):
     if btn == "Mostrar Aeropuertos":
-        print "LALAL"
+        if aeropuertosCounter:
+            print list(prolog.query("aeropuerto(Y, X)"))
     else:
         print "LL"
         
 app = gui("Programa de aviones")
 prolog = Prolog()
-prolog.assertz("vuelo(sara)")
-prolog.assertz("aeropuerto(uno)")
-prolog.assertz("vuelo(sarah)")
-#print list(prolog.query("father(michael,X)"))
-print list(prolog.query("vuelo(sarah)"))
-print list(prolog.query("aeropuerto(dos)"))
-prolog.assertz("aeropuerto(tres)")
-print list(prolog.query("aeropuerto(tres)"))
+
+aeropuertosCounter = 0
+vuelosCounter = 0 
 
 app.addLabel("titleAeropuertos", "Aeropuertos", 0, 0, 4)
 app.setLabelBg("titleAeropuertos", "red")
@@ -55,8 +108,8 @@ app.addLabel("titleVuelos", "Vuelos" , 3,0,4)
 app.setLabelBg("titleVuelos", "red")
 app.addLabel("vueloClave", "Clave", 4, 0, 1)
 app.addEntry("vueloClave", 4, 1, 1)
-app.addLabel("Costo", "costo", 4, 2, 1)
-app.addEntry("costo", 4, 3, 1)
+app.addLabel("Costo", "Costo", 4, 2, 1)
+app.addEntry("Costo", 4, 3, 1)
 app.addLabel("aeropuertoOrigen", "Origen", 5, 0, 1)
 app.addEntry("aeropuertoOrigen", 5, 1, 1)
 app.addLabel("aeropuertoDestino", "Destino", 5, 2, 1)
