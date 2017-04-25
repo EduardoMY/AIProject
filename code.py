@@ -3,16 +3,38 @@
 from appJar import gui
 from pyswip import Prolog
 
+def formatText(word):
+    rWord=word.lower().replace(" ", "")
+    for l in rWord:
+        if l < 'a' or l> 'z':
+            rWord=""
+            break
+    return rWord
+
+def formatNumber(number):
+    rNumber = number.replace(" ", "")
+    if not rNumber.isdigit():
+        return "NaN"
+    else:
+        return rNumber
+    
+def formatKey(key):
+    rKey = key.lower().replace(" ", "")
+    
+    if formatText(rKey[0]) =="":
+        return ""
+    for n in rKey[1:-1]:
+        if n < '0' or n > '9':
+            return ""
+    return rKey
+    
 def vueloExists(clave):
-    #print vuelosCounter
     if vuelosCounter and list(prolog.query("vuelo("+clave+", O, D, C)")):
         return True
     else:
         return False
-
     
 def aeropuertoExists(clave):
-    #print aeropuertosCounter
     if aeropuertosCounter and list(prolog.query("aeropuerto("+clave+", X)")):
         return True
     else:
@@ -46,7 +68,6 @@ def deleteAllVuelos(clave):
     
 def deleteAeropuerto(clave):
     prolog.retract("aeropuerto("+clave+",X)")
-    deleteAllVuelos(clave)
     global aeropuertosCounter
     aeropuertosCounter -= 1
     
@@ -57,16 +78,10 @@ def changeVuelo(clave, origen, destino, costo):
 def changeAeropuerto(clave, name):
     deleteAeropuerto(clave)
     addAeropuerto(clave, name)
-
-def menu(btn):
-    if btn=="Cancel":
-        app.stop()
-    else:
-        print "Todos los viajes"
         
 def abcAeropuerto(btn):
-    clave = app.getEntry("aeropuertoClave").lower().replace(" ", "")
-    nombre = app.getEntry("aeropuertoName").lower().replace(" ", "")
+    clave = formatText(app.getEntry("aeropuertoClave"))
+    nombre = formatText(app.getEntry("aeropuertoName"))
     
     if clave == "":
       app.warningBox("Error", "No se encontro clave")
@@ -83,6 +98,7 @@ def abcAeropuerto(btn):
     elif btn == "Baja":
         if aeropuertoExists(clave):
             deleteAeropuerto(clave)
+            deleteAllVuelos(clave)
         else:
             app.warningBox("Error","Esa clave no esta ligada a ningun Aeropuerto")
             
@@ -96,10 +112,10 @@ def abcAeropuerto(btn):
             app.warningBox("Error","Esa clave no esta ligada a ningun Aeropuerto")
 
 def abcVuelo(btn):
-    clave = app.getEntry("vueloClave").lower().replace(" ", "")
-    origen = app.getEntry("aeropuertoOrigen").lower().replace(" ", "")
-    destino = app.getEntry("aeropuertoDestino").lower().replace(" ", "")
-    costo = app.getEntry("Costo").lower().replace(" ", "")
+    clave = formatKey(app.getEntry("vueloClave"))
+    origen = formatText(app.getEntry("aeropuertoOrigen"))
+    destino = formatText(app.getEntry("aeropuertoDestino"))
+    costo = formatNumber(app.getEntry("Costo"))
 
     if clave== "":
         app.warningBox("Error", "No se encontro clave")
@@ -156,6 +172,20 @@ def show(btn):
         else:
             message =  "No se encontraron Vuelos"
     app.infoBox("Resultados", message)
+    
+def menu(btn):
+    aeropuertoOrigen = formatText(app.getEntry("flight0"))
+    aeropuertoDestino = formatText(app.getEntry("flight1"))
+    escalas = formatNumber(app.getOptionBox("Escalas"))
+    resultados = []
+    if btn=="Cancel":
+        app.stop()
+    else:
+        resultados = list(prolog.query("vuelos("+aeropuertoOrigen+", "+aeropuertoDestino+", "+escalas+", Ciudades, Vuelos, C)"))
+        for e in resultados:
+            print e['Ciudades'][0]
+            print e['Ciudades'][1]
+#Sacar propiedad .chars
         
 app = gui("Programa de aviones")
 prolog = Prolog()
@@ -177,6 +207,8 @@ prolog.assertz("vuelo(v002, mxl, bar, 125)")
 prolog.assertz("vuelo(v003,  bar, cal, 125)")
 prolog.assertz("vuelo(v004, cal, den, 125)")
 vuelosCounter =+4
+
+prolog.consult("aviones.prolog")
 
 app.addLabel("titleAeropuertos", "Aeropuertos", 0, 0, 4)
 app.setLabelBg("titleAeropuertos", "red")
