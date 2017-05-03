@@ -21,6 +21,9 @@ def formatNumber(number):
 def formatKey(key):
     rKey = key.lower().replace(" ", "")
     
+    if rKey=="":
+        return ""
+    
     if formatText(rKey[0]) =="":
         return ""
     for n in rKey[1:-1]:
@@ -60,11 +63,11 @@ def deleteAllVuelos(clave):
     
     if vuelosCounter != 0:
         vuelosCounter -= len(list(prolog.query("vuelo(K, "+clave+", D, C)")))
-        prolog.retract("vuelo(K,"+clave+", D, C)")
+        prolog.retractall("vuelo(K,"+clave+", D, C)")
         
     if vuelosCounter != 0:
         vuelosCounter -= len(list(prolog.query("vuelo(K, O, "+clave+", C)")))
-        prolog.retract("vuelo(K, O, "+clave+", C)")
+        prolog.retractall("vuelo(K, O, "+clave+", C)")
     
 def deleteAeropuerto(clave):
     prolog.retract("aeropuerto("+clave+",X)")
@@ -182,9 +185,24 @@ def menu(btn):
         app.stop()
     else:
         resultados = list(prolog.query("vuelos("+aeropuertoOrigen+", "+aeropuertoDestino+", "+escalas+", Ciudades, Vuelos, C)"))
+        print resultados
+        vuelos=""
+        ciudades=""
+        costo=""
+        message=""
         for e in resultados:
-            print e['Ciudades'][0]
-            print e['Ciudades'][1]
+            for c in e['Ciudades']:
+                ciudades+= str(c) + ","
+            for v in e['Vuelos']:
+                vuelos+= str(v) + ","
+            costo=str(e['C'])
+            message= ciudades + "--" + vuelos + "--" + costo
+            ciudades=""
+            vuelos=""
+            costo=""
+            app.addListItem("resultados", message)
+        app.showSubWindow("Resultados_Vuelos_Query")
+            
 #Sacar propiedad .chars
         
 app = gui("Programa de aviones")
@@ -226,8 +244,10 @@ app.addLabel("Costo", "Costo", 4, 2, 1)
 app.addEntry("Costo", 4, 3, 1)
 app.addLabel("aeropuertoOrigen", "Origen", 5, 0, 1)
 app.addEntry("aeropuertoOrigen", 5, 1, 1)
+#app.addLabelOptionBox("aeropuertoOrigen", ["-E-"],5, 1, 2)
 app.addLabel("aeropuertoDestino", "Destino", 5, 2, 1)
 app.addEntry("aeropuertoDestino", 5, 3, 1)
+#app.addLabelOptionBox("aeropuertoDestino", ["-E-"],5, 3, 2)
 app.addButtons(["_Alta", "_Baja", "_Cambio"], abcVuelo, 6, 0, 4)
 
 app.addLabel("consultas", "Consultas", 7, 0, 4)
@@ -237,12 +257,18 @@ app.addButtons(["Mostrar Aeropuertos","Mostrar Vuelos"], show, 8, 0, 4)
 app.addLabel("titleFindFlights","Encontrar vuelos", 9, 0, 4)
 app.setLabelBg("titleFindFlights", "blue")
 
-
 app.addLabel("flight0", "Aeropuerto Inicio", 10, 0, 1)
 app.addEntry("flight0", 10, 1, 1)
 app.addLabel("flight1", "Aeropuerto Destino", 10, 2, 1)
 app.addEntry("flight1", 10, 3, 1)
 app.addLabelOptionBox("Escalas", ["0", "1", "2", "3"],11, 0, 4 )
 app.addButtons(["Obtener viajes", "Salir"], menu, 12, 0, 4)
+
+#SubWindows resultados
+app.startSubWindow("Resultados_Vuelos_Query", modal=True)
+app.addListBox("resultados",
+               ["Format: Ciudades * Vuelos * Costo"], 0, 0, 10)
+
+app.stopSubWindow()
 
 app.go()
