@@ -44,19 +44,6 @@ def aeropuertoExists(clave):
     else:
         return False
     
-def flightWithOD(o, d):
-    if not aeropuertoExists(o) or not aeropuertoExists(d):
-        print "FFF"
-        return False
-    print "hi"
-    if aeropuertosCounter and list(prolog.query("vuelo(K, "+o+", "+d+",C)")):
-        print "True"
-        return True
-    else:
-        print "False"
-        return False
-    
-    
 def addVuelo(clave, origen, destino, costo):
     prolog.assertz("vuelo("+clave+","+origen+","+destino+"," +costo+")")
     global vuelosCounter
@@ -203,10 +190,13 @@ def menu(btn):
         message += "* Alta: Es necesario tener clave y nombre.\n"
         message += "* Baja: Solo se necesita una clave valida.\n"
         message += "* Cambio: Solo se necesita una clave valida, el nombre se cambiara.\n"
+        message += "** Clave y Nombre deben de ser formato alfabetico (a-z).\n"
         message += "==> Vuelo\n"
         message += "* Alta: Es necesario tener clave y aeropuerto Origen, Destino y Costo (valor entero positivo).\n"
         message += "* Baja: Solo se necesita una clave (de vuelo) valida.\n"
-        message += "* Cambio: Solo se necesita una clave valida, el nombre se cambiara.\n"
+        message += "* Cambio: Se basa en la clave de vuelo valida. Todo cambia menos la clave de vuelo.\n"
+        message += "** Clave de Origen y Destino son alfabetico. Costo numero entero.\n"
+        message += "** Clave de vuelo debe de ser letra(1) + numeros(n).\n"
         message += "==> Consultas\n"
         message += "Dependiendo del boton veras los aeropuertos o vuelos\n"
         message += "==> Encontrar vuelos\n"
@@ -214,25 +204,32 @@ def menu(btn):
         message += "Tienes la opcion de poner escalas [default=0, 3]\n"
         app.infoBox("Informacion de Ayuda", message)
     else:
-        resultados = list(prolog.query("vuelos("+aeropuertoOrigen+", "+aeropuertoDestino+", "+escalas+", Ciudades, Vuelos, C)"))
-        print resultados
-        vuelos=""
-        ciudades=""
-        costo=""
-        message=""
-        for e in resultados:
-            for c in e['Ciudades']:
-                ciudades+= str(c) + ","
-            for v in e['Vuelos']:
-                vuelos+= str(v) + ","
-            costo=str(e['C'])
-            message += "Ciudades:" + ciudades + "\nVuelos:" + vuelos + "\nCosto: " + costo+"\n----------------\n"
-            ciudades=""
-            vuelos=""
-            costo=""
-            #app.addListItem("resultados", message)
-            app.infoBox("Resultados - Busqueda", message)
-        #app.showSubWindow("Resultados_Vuelos_Query")
+        print aeropuertoOrigen
+        print aeropuertoDestino
+        print 
+        if aeropuertoOrigen != "" and aeropuertoDestino != "":
+            if aeropuertoExists(aeropuertoOrigen) and  aeropuertoExists(aeropuertoDestino):
+                resultados = list(prolog.query("vuelos("+aeropuertoOrigen+", "+aeropuertoDestino+", "+escalas+", Ciudades, Vuelos, C)"))
+                print resultados
+                vuelos=""
+                ciudades=""
+                costo=""
+                message=""
+                for e in resultados:
+                    for c in e['Ciudades']:
+                        ciudades+= str(c) + ","
+                    for v in e['Vuelos']:
+                        vuelos+= str(v) + ","
+                    costo=str(e['C'])
+                    message += "Ciudades:" + ciudades + "\nVuelos:" + vuelos + "\nCosto: " + costo+"\n----------------\n"
+                    ciudades=""
+                    vuelos=""
+                    costo=""
+                app.infoBox("Resultados - Busqueda", message)
+            else:
+                app.warningBox("Error", "Hubo un problema con las claves. El sistema no las reconocio.")
+        else:
+            app.warningBox("Error", "Las claves no son validas.")
             
 #Sacar propiedad .chars
         
@@ -242,6 +239,7 @@ prolog = Prolog()
 aeropuertosCounter = 0
 vuelosCounter = 0 
 
+'''
 #Informacion por default para pruebas
 prolog.assertz("aeropuerto(mxl, mexicali)")
 prolog.assertz("aeropuerto(bar, barcelona)")
@@ -256,7 +254,7 @@ prolog.assertz("vuelo(v002, mxl, bar, 125)")
 prolog.assertz("vuelo(v003,  bar, cal, 125)")
 prolog.assertz("vuelo(v004, cal, den, 125)")
 vuelosCounter =+4
-
+'''
 prolog.consult("aviones.prolog")
 
 app.addLabel("titleAeropuertos", "Aeropuertos", 0, 0, 4)
