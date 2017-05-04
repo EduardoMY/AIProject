@@ -37,12 +37,26 @@ def vueloExists(clave):
     else:
         return False
     
+
 def aeropuertoExists(clave):
     if aeropuertosCounter and list(prolog.query("aeropuerto("+clave+", X)")):
         return True
     else:
         return False
-
+    
+def flightWithOD(o, d):
+    if not aeropuertoExists(o) or not aeropuertoExists(d):
+        print "FFF"
+        return False
+    print "hi"
+    if aeropuertosCounter and list(prolog.query("vuelo(K, "+o+", "+d+",C)")):
+        print "True"
+        return True
+    else:
+        print "False"
+        return False
+    
+    
 def addVuelo(clave, origen, destino, costo):
     prolog.assertz("vuelo("+clave+","+origen+","+destino+"," +costo+")")
     global vuelosCounter
@@ -141,7 +155,7 @@ def abcVuelo(btn):
         if vueloExists(clave):
             deleteVuelo(clave)
         else:
-            app.warningBox("Error", "Esa clave no esta ligada a ningun VVuelo")
+            app.warningBox("Error", "Esa clave no esta ligada a ningun Vuelo")
             
     else:
         if vueloExists(clave):
@@ -181,8 +195,24 @@ def menu(btn):
     aeropuertoDestino = formatText(app.getEntry("flight1"))
     escalas = formatNumber(app.getOptionBox("Escalas"))
     resultados = []
-    if btn=="Cancel":
+    if btn=="Salir":
         app.stop()
+    elif btn == "Ayuda":
+        message="=========Ayuda=======\n"
+        message += "==> Aeropuerto\n"
+        message += "* Alta: Es necesario tener clave y nombre.\n"
+        message += "* Baja: Solo se necesita una clave valida.\n"
+        message += "* Cambio: Solo se necesita una clave valida, el nombre se cambiara.\n"
+        message += "==> Vuelo\n"
+        message += "* Alta: Es necesario tener clave y aeropuerto Origen, Destino y Costo (valor entero positivo).\n"
+        message += "* Baja: Solo se necesita una clave (de vuelo) valida.\n"
+        message += "* Cambio: Solo se necesita una clave valida, el nombre se cambiara.\n"
+        message += "==> Consultas\n"
+        message += "Dependiendo del boton veras los aeropuertos o vuelos\n"
+        message += "==> Encontrar vuelos\n"
+        message += "La clave del aeropuerto origen y destino deben de ser validas\n"
+        message += "Tienes la opcion de poner escalas [default=0, 3]\n"
+        app.infoBox("Informacion de Ayuda", message)
     else:
         resultados = list(prolog.query("vuelos("+aeropuertoOrigen+", "+aeropuertoDestino+", "+escalas+", Ciudades, Vuelos, C)"))
         print resultados
@@ -196,12 +226,13 @@ def menu(btn):
             for v in e['Vuelos']:
                 vuelos+= str(v) + ","
             costo=str(e['C'])
-            message= ciudades + "--" + vuelos + "--" + costo
+            message += "Ciudades:" + ciudades + "\nVuelos:" + vuelos + "\nCosto: " + costo+"\n----------------\n"
             ciudades=""
             vuelos=""
             costo=""
-            app.addListItem("resultados", message)
-        app.showSubWindow("Resultados_Vuelos_Query")
+            #app.addListItem("resultados", message)
+            app.infoBox("Resultados - Busqueda", message)
+        #app.showSubWindow("Resultados_Vuelos_Query")
             
 #Sacar propiedad .chars
         
@@ -262,7 +293,7 @@ app.addEntry("flight0", 10, 1, 1)
 app.addLabel("flight1", "Aeropuerto Destino", 10, 2, 1)
 app.addEntry("flight1", 10, 3, 1)
 app.addLabelOptionBox("Escalas", ["0", "1", "2", "3"],11, 0, 4 )
-app.addButtons(["Obtener viajes", "Salir"], menu, 12, 0, 4)
+app.addButtons(["Obtener viajes", "Ayuda","Salir"], menu, 12, 0, 4)
 
 #SubWindows resultados
 app.startSubWindow("Resultados_Vuelos_Query", modal=True)
