@@ -2,7 +2,7 @@
 
 from appJar import gui
 from pyswip import Prolog
-
+                    
 def formatText(word):
     rWord=word.lower().replace(" ", "")
     for l in rWord:
@@ -202,11 +202,10 @@ def menu(btn):
         message += "==> Encontrar vuelos\n"
         message += "La clave del aeropuerto origen y destino deben de ser validas\n"
         message += "Tienes la opcion de poner escalas [default=0, 3]\n"
-        app.infoBox("Informacion de Ayuda", message)
+        app.infoBox("-- Ayuda --", message)
     else:
         print aeropuertoOrigen
         print aeropuertoDestino
-        print 
         if aeropuertoOrigen != "" and aeropuertoDestino != "":
             if aeropuertoExists(aeropuertoOrigen) and  aeropuertoExists(aeropuertoDestino):
                 resultados = list(prolog.query("vuelos("+aeropuertoOrigen+", "+aeropuertoDestino+", "+escalas+", Ciudades, Vuelos, C)"))
@@ -230,8 +229,6 @@ def menu(btn):
                 app.warningBox("Error", "Hubo un problema con las claves. El sistema no las reconocio.")
         else:
             app.warningBox("Error", "Las claves no son validas.")
-            
-#Sacar propiedad .chars
         
 app = gui("Programa de aviones")
 prolog = Prolog()
@@ -239,7 +236,6 @@ prolog = Prolog()
 aeropuertosCounter = 0
 vuelosCounter = 0 
 
-'''
 #Informacion por default para pruebas
 prolog.assertz("aeropuerto(mxl, mexicali)")
 prolog.assertz("aeropuerto(bar, barcelona)")
@@ -254,8 +250,8 @@ prolog.assertz("vuelo(v002, mxl, bar, 125)")
 prolog.assertz("vuelo(v003,  bar, cal, 125)")
 prolog.assertz("vuelo(v004, cal, den, 125)")
 vuelosCounter =+4
-'''
-prolog.consult("aviones.prolog")
+
+prolog.consult("/home/emedina/Documents/AIProject/aviones.prolog")
 
 app.addLabel("titleAeropuertos", "Aeropuertos", 0, 0, 4)
 app.setLabelBg("titleAeropuertos", "red")
@@ -292,12 +288,5 @@ app.addLabel("flight1", "Aeropuerto Destino", 10, 2, 1)
 app.addEntry("flight1", 10, 3, 1)
 app.addLabelOptionBox("Escalas", ["0", "1", "2", "3"],11, 0, 4 )
 app.addButtons(["Obtener viajes", "Ayuda","Salir"], menu, 12, 0, 4)
-
-#SubWindows resultados
-app.startSubWindow("Resultados_Vuelos_Query", modal=True)
-app.addListBox("resultados",
-               ["Format: Ciudades * Vuelos * Costo"], 0, 0, 10)
-
-app.stopSubWindow()
 
 app.go()

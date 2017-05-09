@@ -1,18 +1,3 @@
-/*
-aeropuerto(mxl, mexicali).
-aeropuerto(bar, barcelona).
-aeropuerto(cal, calcuta).
-aeropuerto(dam, damasco).
-aeropuerto(est, estambul).
-aeropuerto(den, denver).
-
-vuelo(v001, mxl, den, 300).
-vuelo(v002, mxl, bar, 125).
-vuelo(v003,  bar, cal, 125).
-vuelo(v004, cal, den, 125).
-
-*/
-
 /* Thanks Tony : V*/
 
 vuelos(A, B, C, Path, Vuelos, Len) :- path(A, B, Path, Vuelos, Len), length(Path, C1), C is C1 - 2.
