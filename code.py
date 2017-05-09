@@ -126,7 +126,7 @@ def abcVuelo(btn):
     elif btn == "_Alta":
         if not vueloExists(clave):
             if origen != "" and destino != "" and costo != "":
-                if aeropuertoExists(origen) and aeropuertoExists(destino):
+                if aeropuertoExists(origen) and aeropuertoExists(destino) and origen != destino:
                     if costo.isdigit():
                         addVuelo(clave, origen, destino, costo)
                     else:
@@ -235,7 +235,7 @@ prolog = Prolog()
 
 aeropuertosCounter = 0
 vuelosCounter = 0 
-
+'''
 #Informacion por default para pruebas
 prolog.assertz("aeropuerto(mxl, mexicali)")
 prolog.assertz("aeropuerto(bar, barcelona)")
@@ -250,7 +250,7 @@ prolog.assertz("vuelo(v002, mxl, bar, 125)")
 prolog.assertz("vuelo(v003,  bar, cal, 125)")
 prolog.assertz("vuelo(v004, cal, den, 125)")
 vuelosCounter =+4
-
+'''
 prolog.consult("/home/emedina/Documents/AIProject/aviones.prolog")
 
 app.addLabel("titleAeropuertos", "Aeropuertos", 0, 0, 4)
