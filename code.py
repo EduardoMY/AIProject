@@ -5,10 +5,12 @@ from pyswip import Prolog
                     
 def formatText(word):
     rWord=word.lower().replace(" ", "")
+    
     for l in rWord:
         if l < 'a' or l> 'z':
             rWord=""
             break
+        
     return rWord
 
 def formatNumber(number):
@@ -195,7 +197,8 @@ def menu(btn):
         message += "* Alta: Es necesario tener clave y aeropuerto Origen, Destino y Costo (valor entero positivo).\n"
         message += "* Baja: Solo se necesita una clave (de vuelo) valida.\n"
         message += "* Cambio: Se basa en la clave de vuelo valida. Todo cambia menos la clave de vuelo.\n"
-        message += "** Clave de Origen y Destino son alfabetico. Costo numero entero.\n"
+        message += "** Clave de Origen y Destino son alfabetico. Costo es numero entero.\n"
+        message += "** Origen y Destino no pueden ser el mismo valor.\n"
         message += "** Clave de vuelo debe de ser letra(1) + numeros(n).\n"
         message += "==> Consultas\n"
         message += "Dependiendo del boton veras los aeropuertos o vuelos\n"
@@ -204,8 +207,6 @@ def menu(btn):
         message += "Tienes la opcion de poner escalas [default=0, 3]\n"
         app.infoBox("-- Ayuda --", message)
     else:
-        print aeropuertoOrigen
-        print aeropuertoDestino
         if aeropuertoOrigen != "" and aeropuertoDestino != "":
             if aeropuertoExists(aeropuertoOrigen) and  aeropuertoExists(aeropuertoDestino):
                 resultados = list(prolog.query("vuelos("+aeropuertoOrigen+", "+aeropuertoDestino+", "+escalas+", Ciudades, Vuelos, C)"))
